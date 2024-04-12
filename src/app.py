@@ -8,9 +8,11 @@ import sys
 
 if sys.platform == 'linux':
     try:
-        import RPi.GPIO as GPIO
+        import gpio as GPIO
     except RuntimeError:
-        print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
+        print("Error importing gpio!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
+    pin4 = GPIO.GPIOPin(4, gpio.OUT)
+    pin7 = GPIO.GPIOPin(7, gpio.OUT)
 
 
 with open('settings.yml', 'r') as file:
@@ -46,20 +48,20 @@ def on_message(client, userdata, message, properties=None):
         if int(message.payload) == 1:
             logging.info("Command switch1 HIGH")
             if sys.platform == 'linux':
-                GPIO.output(4, GPIO.HIGH)
+                pin4.write(4, GPIO.HIGH)
         if int(message.payload) == 0:
             logging.info("Command switch1 LOW")
             if sys.platform == 'linux':
-                GPIO.output(4, GPIO.LOW)
+                pin4.write(4, GPIO.LOW)
     if topic[-1] == "switch2":
         if int(message.payload) == 1:
             logging.info("Command switch2 HIGH")
             if sys.platform == 'linux':
-                GPIO.output(4, GPIO.HIGH)
+                pin7.write(4, GPIO.HIGH)
         if int(message.payload) == 0:
             logging.info("Command switch2 LOW")
             if sys.platform == 'linux':
-                GPIO.output(4, GPIO.LOW)
+                pin7.write(4, GPIO.LOW)
 
 def on_disconnect(client, userdata, disconnect_flags, reason_code, properties):
     result = client.publish("clients/"+settings['mqtt']['clientid'], "offline", qos=2, retain=True)
@@ -78,10 +80,7 @@ def run():
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Start Application")
 
-    if sys.platform == 'linux':
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(4, GPIO.OUT, initial=GPIO.LOW)
-        GPIO.setup(7, GPIO.OUT, initial=GPIO.LOW)
+
 
     logging.info("Start Connection")
     client = mqtt_client.Client(client_id=settings['mqtt']['clientid'], callback_api_version=mqtt_client.CallbackAPIVersion.VERSION2)
