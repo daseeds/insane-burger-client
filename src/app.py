@@ -11,8 +11,8 @@ if sys.platform == 'linux':
         import gpio as GPIO
     except RuntimeError:
         print("Error importing gpio!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
-    pin4 = GPIO.GPIOPin(4, gpio.OUT)
-    pin7 = GPIO.GPIOPin(7, gpio.OUT)
+    pin4 = GPIO.GPIOPin(4, GPIO.OUT)
+    pin7 = GPIO.GPIOPin(7, GPIO.OUT)
 
 
 with open('settings.yml', 'r') as file:
