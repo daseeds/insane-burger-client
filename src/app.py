@@ -79,7 +79,7 @@ def run():
     logging.info("Start Application")
 
     if sys.platform == 'linux':
-        GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BCM)
         GPIO.setup(4, GPIO.OUT, initial=GPIO.LOW)
         GPIO.setup(7, GPIO.OUT, initial=GPIO.LOW)
 
