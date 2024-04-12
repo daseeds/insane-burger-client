@@ -1,0 +1,24 @@
+{
+    "availability": [
+      {
+        "topic": "$SYS/broker/connection/bb3hass/state"
+      }
+    ],
+    "command_topic": "devices/toulon1/switch1/set",
+    "device": {
+      "identifiers": [
+        "toulon1_switch1"
+      ],
+      "manufacturer": "NPNG",
+      "model": "RaspberryPi4Hack",
+      "name": "Toulon1Switch1",
+      "sw_version": "1"
+    },
+    "json_attributes_topic": "devices/toulon1/switch1",
+    "name": "Toulon1Switch1",
+    "payload_off": "OFF",
+    "payload_on": "ON",
+    "state_topic": "devices/toulon1/switch1",
+    "unique_id": "toulon1_switch1",
+    "value_template": "{{ value_json.state }}"
+  }

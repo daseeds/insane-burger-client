@@ -1,0 +1,24 @@
+{
+    "availability": [
+      {
+        "topic": "zigbee2mqtt/bridge/state"
+      }
+    ],
+    "command_topic": "zigbee2mqtt/E1702-01/set",
+    "device": {
+      "identifiers": [
+        "zigbee2mqtt_0x842e14fffe64b8d7"
+      ],
+      "manufacturer": "IKEA",
+      "model": "TRADFRI control outlet (E1603/E1702)",
+      "name": "E1702-01",
+      "sw_version": "Zigbee2MQTT 1.18.1"
+    },
+    "json_attributes_topic": "zigbee2mqtt/E1702-01",
+    "name": "E1702-01",
+    "payload_off": "OFF",
+    "payload_on": "ON",
+    "state_topic": "zigbee2mqtt/E1702-01",
+    "unique_id": "0x842e14fffe64b8d7_switch_zigbee2mqtt",
+    "value_template": "{{ value_json.state }}"
+  }

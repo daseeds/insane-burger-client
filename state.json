@@ -1,0 +1,38 @@
+homeassistant/switch/0x84fd27fffe431fc0/switch/config
+{
+    "availability": [
+      {
+        "topic": "zigbee2mqtt/bridge/state"
+      }
+    ],
+    "command_topic": "zigbee2mqtt/E1702-04-Abeilles/set",
+    "device": {
+      "identifiers": [
+        "zigbee2mqtt_0x84fd27fffe431fc0"
+      ],
+      "manufacturer": "IKEA",
+      "model": "TRADFRI control outlet (E1603/E1702)",
+      "name": "E1702-04-Abeilles",
+      "sw_version": "Zigbee2MQTT 1.18.1"
+    },
+    "json_attributes_topic": "zigbee2mqtt/E1702-04-Abeilles",
+    "name": "E1702-04-Abeilles",
+    "payload_off": "OFF",
+    "payload_on": "ON",
+    "state_topic": "zigbee2mqtt/E1702-04-Abeilles",
+    "unique_id": "0x84fd27fffe431fc0_switch_zigbee2mqtt",
+    "value_template": "{{ value_json.state }}"
+  }
+  
+zigbee2mqtt/E1702-04-Abeilles
+{
+    "linkquality": 75,
+    "state": "OFF",
+    "update": {
+      "state": "available"
+    },
+    "update_available": true
+  }
+
+  zigbee2mqtt/E1702-04-Abeilles/set
+  OFF
