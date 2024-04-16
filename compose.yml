@@ -3,3 +3,7 @@ services:
     build: .
     privileged: true
     restart: always
+    volumes:
+      - shared:/shared
+volumes:
+  shared:

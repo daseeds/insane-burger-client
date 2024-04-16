@@ -65,7 +65,7 @@ def on_message(client, userdata, message, properties=None):
     if topic[-1] == "command":
         if message.payload == b"update":
             logging.info("Update")
-            subprocess.run(["bash", "-c", settings['update']['path']])
+            subprocess.run(["bash", "-c", "echo update.sh > host_executor_queue"])
             
 
 
