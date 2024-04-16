@@ -62,7 +62,7 @@ def on_message(client, userdata, message, properties=None):
             if sys.platform == 'linux':
                 GPIO.output(4, GPIO.LOW)
     if topic[-1] == "command":
-        if message.payload == "update":
+        if str(message.payload) == "update":
             logging.info("Update")
             subprocess.run(["bash", "-c", "update.sh"])
             
