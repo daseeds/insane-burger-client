@@ -16,9 +16,10 @@
     },
     "json_attributes_topic": "devices/toulon1/switch1",
     "name": "Toulon1Switch1",
-    "payload_off": "OFF",
-    "payload_on": "ON",
+    "payload_off": "off",
+    "payload_on": "on",
     "state_topic": "devices/toulon1/switch1",
     "unique_id": "toulon1_switch1",
-    "value_template": "{{ value_json.state }}"
+    "value_template": "{{ value_json.state }}",
+    "retain": true
   }
