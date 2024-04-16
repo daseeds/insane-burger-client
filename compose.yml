@@ -4,6 +4,6 @@ services:
     privileged: true
     restart: always
     volumes:
-      - shared:/shared
+      - shared:/shared:rw
 volumes:
   shared:
