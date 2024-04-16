@@ -2,7 +2,7 @@ mqtt:
   broker: '885e165ca7814f208a7f0833af8e59e9.s1.eu.hivemq.cloud'
   port: 8883
   username: 'toulon1'
-  password: 'q#V.!MjN58fj7Fs'
+  password: ''
   clientid: 'test1'
 
 to_sub:
