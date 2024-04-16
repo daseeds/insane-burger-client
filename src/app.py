@@ -1,5 +1,6 @@
 # python 3.11
 
+import subprocess
 import yaml
 import time
 from paho.mqtt import client as mqtt_client
@@ -60,6 +61,11 @@ def on_message(client, userdata, message, properties=None):
             logging.info("Command switch2 LOW")
             if sys.platform == 'linux':
                 GPIO.output(4, GPIO.LOW)
+    if topic[-1] == "command":
+        if message.payload == "update":
+            subprocess.run(["bash", "-c", "update.sh"])
+            
+
 
 def on_disconnect(client, userdata, disconnect_flags, reason_code, properties):
     result = client.publish("clients/"+settings['mqtt']['clientid'], "offline", qos=2, retain=True)

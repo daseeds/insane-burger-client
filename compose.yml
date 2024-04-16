@@ -2,3 +2,4 @@ services:
   insane-burger:
     build: .
     privileged: true
+    restart: always
