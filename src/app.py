@@ -7,15 +7,16 @@ from paho.mqtt import client as mqtt_client
 import logging
 import sys
 
-if sys.platform == 'linux':
-    try:
-        import RPi.GPIO as GPIO
-    except RuntimeError:
-        print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
-
-
 with open('settings.yml', 'r') as file:
     settings = yaml.safe_load(file)
+
+gpio_enabled = False
+
+try:
+    import RPi.GPIO as GPIO
+    gpio_enabled = True
+except RuntimeError:
+    print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
 
 
 def on_log(client, userdata, paho_log_level, messages):
@@ -46,23 +47,23 @@ def on_message(client, userdata, message, properties=None):
     if topic[-1] == "switch1":
         if int(message.payload) == 1:
             logging.info("Command switch1 HIGH yo")
-            if sys.platform == 'linux':
+            if gpio_enabled:
                 GPIO.output(4, GPIO.HIGH)
         if int(message.payload) == 0:
             logging.info("Command switch1 LOW")
-            if sys.platform == 'linux':
+            if gpio_enabled:
                 GPIO.output(4, GPIO.LOW)
     if topic[-1] == "switch2":
         if int(message.payload) == 1:
             logging.info("Command switch2 HIGH")
-            if sys.platform == 'linux':
+            if gpio_enabled:
                 GPIO.output(4, GPIO.HIGH)
         if int(message.payload) == 0:
             logging.info("Command switch2 LOW")
-            if sys.platform == 'linux':
+            if gpio_enabled:
                 GPIO.output(4, GPIO.LOW)
     if topic[-1] == "command":
-        if str(message.payload) == "update":
+        if message.payload == b"update":
             logging.info("Update")
             subprocess.run(["bash", "-c", "update.sh"])
             
@@ -85,7 +86,7 @@ def run():
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Start Application")
 
-    if sys.platform == 'linux':
+    if gpio_enabled:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(4, GPIO.OUT, initial=GPIO.LOW)
         GPIO.setup(7, GPIO.OUT, initial=GPIO.LOW)
