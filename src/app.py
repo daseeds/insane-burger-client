@@ -44,7 +44,7 @@ def on_message(client, userdata, message, properties=None):
     topic = message.topic.split("/")
     if topic[-1] == "switch1":
         if int(message.payload) == 1:
-            logging.info("Command switch1 HIGH")
+            logging.info("Command switch1 HIGH yo")
             if sys.platform == 'linux':
                 GPIO.output(4, GPIO.HIGH)
         if int(message.payload) == 0:
