@@ -1,7 +1,7 @@
 {
     "availability": [
       {
-        "topic": "$SYS/broker/connection/bb3hass/state"
+        "topic": "devices/test1"
       }
     ],
     "command_topic": "devices/toulon1/switch1/set",

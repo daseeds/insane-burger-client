@@ -6,9 +6,18 @@ import time
 from paho.mqtt import client as mqtt_client
 import logging
 import sys
+import json
 
 with open('settings.yml', 'r') as file:
     settings = yaml.safe_load(file)
+
+with open(settings['descriptor'], 'r') as file:
+    descriptor = json.load(file)
+
+descriptor['unique_id'] = settings['unique_id']
+descriptor['name'] = settings['unique_id']
+descriptor['state_topic'] = settings['topics']['state']
+descriptor['command_topic'] = settings['topics']['command']
 
 gpio_enabled = False
 
@@ -34,7 +43,8 @@ def on_subscribe(client, userdata, mid, reason_code_list, properties):
 def on_connect(client, userdata, flags, rc, properties):
     if rc == 0:
         logging.info("Connected to MQTT Broker!")
-        result = client.publish("clients/"+settings['mqtt']['clientid'], "online", qos=2, retain=True)
+        result = client.publish(settings['topics']['state'], "online", qos=2, retain=True)
+        result = client.publish(settings['topics']['advertise'], json.dumps(descriptor), qos=2, retain=True)
     else:
         logging.info("Failed to connect, return code %d\n", rc)
 
@@ -70,16 +80,12 @@ def on_message(client, userdata, message, properties=None):
 
 
 def on_disconnect(client, userdata, disconnect_flags, reason_code, properties):
-    result = client.publish("clients/"+settings['mqtt']['clientid'], "offline", qos=2, retain=True)
-
-
+    result = client.publish(settings['topics']['state'], "offline", qos=2, retain=True)
 
 def subscribe(client: mqtt_client):
     for topic in settings['to_sub']:
         logging.info("Subscribe to " + topic)
         client.subscribe(topic)
-
-
 
 def run():
     logging.basicConfig(format='%(asctime)s %(message)s')
