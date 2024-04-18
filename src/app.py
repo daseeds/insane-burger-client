@@ -16,10 +16,13 @@ with open(settings['descriptor'], 'r') as file:
 
 descriptor['unique_id'] = settings['unique_id']
 descriptor['name'] = settings['unique_id']
+descriptor['device']['name'] = settings['unique_id']
 descriptor['state_topic'] = settings['topics']['state']
 descriptor['command_topic'] = settings['topics']['command']
 
 gpio_enabled = False
+
+switch1_state = "off"
 
 try:
     import RPi.GPIO as GPIO
@@ -27,6 +30,26 @@ try:
 except RuntimeError:
     print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
 
+def switch_on(client):
+    global switch1_state
+    logging.info("Switch on")
+    if gpio_enabled:
+        GPIO.output(4, GPIO.HIGH)    
+    switch1_state = "on"
+    publish_state(client)
+
+def switch_off(client):
+    global switch1_state
+    logging.info("Switch off")
+    if gpio_enabled:
+        GPIO.output(4, GPIO.LOW)
+    switch1_state = "off"
+    publish_state(client)
+
+def publish_state(client):
+    global switch1_state
+    logging.info("Publish " + switch1_state + " on " + settings['topics']['state'])
+    client.publish(settings['topics']['state'], switch1_state, qos=2, retain=True)
 
 def on_log(client, userdata, paho_log_level, messages):
     if paho_log_level == mqtt_client.LogLevel.MQTT_LOG_ERR:
@@ -43,8 +66,9 @@ def on_subscribe(client, userdata, mid, reason_code_list, properties):
 def on_connect(client, userdata, flags, rc, properties):
     if rc == 0:
         logging.info("Connected to MQTT Broker!")
-        result = client.publish(settings['topics']['state'], "online", qos=2, retain=True)
+        result = client.publish(settings['topics']['availability'], "online", qos=2, retain=True)
         result = client.publish(settings['topics']['advertise'], json.dumps(descriptor), qos=2, retain=True)
+        publish_state(client)
     else:
         logging.info("Failed to connect, return code %d\n", rc)
 
@@ -54,24 +78,13 @@ def on_message(client, userdata, message, properties=None):
         + "' with QoS " + str(message.qos))
     
     topic = message.topic.split("/")
-    if topic[-1] == "switch1":
-        if int(message.payload) == 1:
+    if message.topic == settings['topics']['command']:
+        if message.payload == b'on':
             logging.info("Command switch1 HIGH yo")
-            if gpio_enabled:
-                GPIO.output(4, GPIO.HIGH)
-        if int(message.payload) == 0:
+            switch_on(client)
+        if message.payload == b'off':
             logging.info("Command switch1 LOW")
-            if gpio_enabled:
-                GPIO.output(4, GPIO.LOW)
-    if topic[-1] == "switch2":
-        if int(message.payload) == 1:
-            logging.info("Command switch2 HIGH")
-            if gpio_enabled:
-                GPIO.output(4, GPIO.HIGH)
-        if int(message.payload) == 0:
-            logging.info("Command switch2 LOW")
-            if gpio_enabled:
-                GPIO.output(4, GPIO.LOW)
+            switch_off(client)
     if topic[-1] == "command":
         if message.payload == b"update":
             logging.info("Update")
