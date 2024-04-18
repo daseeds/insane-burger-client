@@ -19,6 +19,14 @@ descriptor['name'] = settings['unique_id']
 descriptor['device']['name'] = settings['unique_id']
 descriptor['state_topic'] = settings['topics']['state']
 descriptor['command_topic'] = settings['topics']['command']
+descriptor['device']['identifiers'].clear()
+descriptor['device']['identifiers'].append(settings['unique_id'])
+descriptor['availability'].clear()
+avail = {}
+avail['topic'] = settings['topics']['availability']
+
+descriptor['availability'].append(avail)
+
 
 gpio_enabled = False
 
