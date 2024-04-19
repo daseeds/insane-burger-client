@@ -38,6 +38,14 @@ try:
 except RuntimeError:
     print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
 
+try:
+    import adafruit_dht
+    import board
+    dht_enabled = True
+    dht_device = adafruit_dht.DHT22(board.D17)
+except RuntimeError:
+    print("Error importing adafruit_dht! ")
+
 def switch_on(client):
     global switch1_state
     logging.info("Switch on")
@@ -72,11 +80,15 @@ def on_subscribe(client, userdata, mid, reason_code_list, properties):
         logging.info(f"Broker granted the following QoS: {reason_code_list[0].value}")
 
 def on_connect(client, userdata, flags, rc, properties):
+    global dht_enabled
     if rc == 0:
         logging.info("Connected to MQTT Broker!")
         result = client.publish(settings['topics']['availability'], "online", qos=2, retain=True)
         result = client.publish(settings['topics']['advertise'], json.dumps(descriptor), qos=2, retain=True)
         publish_state(client)
+        if dht_enabled:
+            temperature_c = dht_device.temperature
+            logging.info("temp="+temperature_c)
     else:
         logging.info("Failed to connect, return code %d\n", rc)
 
