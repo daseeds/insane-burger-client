@@ -63,9 +63,11 @@ def start_secondary(stop_event):
   while not stop_event.is_set():
     logging.info("thread loop")
     if dht_enabled:
-        temperature_c = dht_device.temperature
-        humidity = dht_device.humidity
-        logging.info("temp="+str(temperature_c)+"hum="+str(humidity))
+        try:
+            temperature_c = dht_device.temperature
+            humidity = dht_device.humidity
+            logging.info("temp="+str(temperature_c)+"hum="+str(humidity))
+        except Exception: pass
     sleep(2.0)
 
 def switch_on(client):
