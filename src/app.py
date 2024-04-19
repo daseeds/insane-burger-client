@@ -168,7 +168,7 @@ def run():
     logging.info("Subscribe")
     subscribe(client)
     stop_event = threading.Event()
-    secondary_thread = threading.Thread(target=start_secondary, args=(stop_event))
+    secondary_thread = threading.Thread(target=start_secondary, args=(stop_event,))
     secondary_thread.daemon = True
     secondary_thread.start()    
     logging.info("Loop")
