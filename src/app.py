@@ -7,6 +7,8 @@ from paho.mqtt import client as mqtt_client
 import logging
 import sys
 import json
+import threading
+from time import sleep
 
 with open('settings.yml', 'r') as file:
     settings = yaml.safe_load(file)
@@ -45,6 +47,14 @@ try:
     dht_device = adafruit_dht.DHT22(board.D17)
 except RuntimeError:
     print("Error importing adafruit_dht! ")
+
+def start_secondary(stop_event):
+  while not stop_event.is_set():
+    if dht_enabled:
+        temperature_c = dht_device.temperature
+        humidity = dht_device.humidity
+        logging.info("temp="+str(temperature_c)+"hum="+str(humidity))
+    sleep(2)
 
 def switch_on(client):
     global switch1_state
@@ -86,9 +96,6 @@ def on_connect(client, userdata, flags, rc, properties):
         result = client.publish(settings['topics']['availability'], "online", qos=2, retain=True)
         result = client.publish(settings['topics']['advertise'], json.dumps(descriptor), qos=2, retain=True)
         publish_state(client)
-        if dht_enabled:
-            temperature_c = dht_device.temperature
-            logging.info("temp="+str(temperature_c))
     else:
         logging.info("Failed to connect, return code %d\n", rc)
 
@@ -148,8 +155,13 @@ def run():
         logging.info("Failed")    
     logging.info("Subscribe")
     subscribe(client)
+    stop_event = threading.Event()
+    secondary_thread = threading.Thread(target=start_secondary, args=(stop_event))
+    secondary_thread.daemon = True
+    secondary_thread.start()    
     logging.info("Loop")
     client.loop_forever()
+    stop_event.set()
     logging.info(f"Received the following message: {client.user_data_get()}")
 
 
