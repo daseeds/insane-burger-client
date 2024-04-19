@@ -88,7 +88,7 @@ def on_connect(client, userdata, flags, rc, properties):
         publish_state(client)
         if dht_enabled:
             temperature_c = dht_device.temperature
-            logging.info("temp="+temperature_c)
+            logging.info("temp="+str(temperature_c))
     else:
         logging.info("Failed to connect, return code %d\n", rc)
 
