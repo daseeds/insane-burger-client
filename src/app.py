@@ -9,6 +9,7 @@ import sys
 import json
 import threading
 from time import sleep
+import io
 
 with open('settings.yml', 'r') as file:
     settings = yaml.safe_load(file)
@@ -34,27 +35,38 @@ gpio_enabled = False
 
 switch1_state = "off"
 
+def is_raspberrypi():
+    try:
+        with io.open('/sys/firmware/devicetree/base/model', 'r') as m:
+            if 'raspberry pi' in m.read().lower(): return True
+    except Exception: pass
+    return False
+
 try:
     import RPi.GPIO as GPIO
     gpio_enabled = True
 except RuntimeError:
     print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
 
-try:
-    import adafruit_dht
-    import board
-    dht_enabled = True
-    dht_device = adafruit_dht.DHT22(board.D17)
-except RuntimeError:
-    print("Error importing adafruit_dht! ")
+if is_raspberrypi:
+    try:
+        import adafruit_dht
+        import board
+        dht_enabled = True
+        dht_device = adafruit_dht.DHT22(board.D17)
+    except RuntimeError:
+        print("Error importing adafruit_dht! ")
 
 def start_secondary(stop_event):
+  global dht_enabled
+  logging.info("thread start")
   while not stop_event.is_set():
+    logging.info("thread loop")
     if dht_enabled:
         temperature_c = dht_device.temperature
         humidity = dht_device.humidity
         logging.info("temp="+str(temperature_c)+"hum="+str(humidity))
-    sleep(2)
+    sleep(2.0)
 
 def switch_on(client):
     global switch1_state
@@ -90,7 +102,7 @@ def on_subscribe(client, userdata, mid, reason_code_list, properties):
         logging.info(f"Broker granted the following QoS: {reason_code_list[0].value}")
 
 def on_connect(client, userdata, flags, rc, properties):
-    global dht_enabled
+    
     if rc == 0:
         logging.info("Connected to MQTT Broker!")
         result = client.publish(settings['topics']['availability'], "online", qos=2, retain=True)
