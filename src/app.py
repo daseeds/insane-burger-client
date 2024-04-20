@@ -45,6 +45,7 @@ if is_raspberrypi:
 
 def publish_descriptors(client):
     for metric in settings['device']['metrics']:
+        logging.info("Publish " + metric['unique_id'])
         message = {}
         avail = {}
         avail['topic'] = settings['device']['availability']
