@@ -63,6 +63,7 @@ def publish_descriptors(client):
         message['name'] = metric['name']
         message['state_topic'] = metric['state_topic']
         message['unique_id'] = metric['unique_id']
+        message['value_template'] = metric['value_template']
         if "command_topic" in metric:
             message['command_topic'] = metric['command_topic']
         if "payload_off" in metric:
@@ -95,7 +96,7 @@ def start_secondary(stop_event, client):
             logging.info("temp="+str(temperature_c)+"hum="+str(humidity))
 
             if temperature_c != last_temp:
-                message['tempearture'] = str(temperature_c)
+                message['temperature'] = str(temperature_c)
             if humidity != last_humid:
                 message['humidity'] = str(humidity)
 
