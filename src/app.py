@@ -78,16 +78,31 @@ def publish_descriptors(client):
         result = client.publish(advertise_topic, json.dumps(message), qos=2, retain=True)
 
 
-def start_secondary(stop_event):
+def start_secondary(stop_event, client):
   global dht_enabled
   logging.info("thread start")
+  last_temp = dht_device.temperature
+  last_humid = dht_device.humidity
+  topic = settings['device']['metrics'][1]['state_topic']
+  
   while not stop_event.is_set():
     logging.info("thread loop")
     if dht_enabled:
         try:
+            message = {}
             temperature_c = dht_device.temperature
             humidity = dht_device.humidity
             logging.info("temp="+str(temperature_c)+"hum="+str(humidity))
+
+            if temperature_c != last_temp:
+                message['tempearture'] = str(temperature_c)
+            if humidity != last_humid:
+                message['humidity'] = str(humidity)
+
+            if len(message.keys()) > 0:
+                logging.info("Publish on " + topic)
+                client.publish(topic, json.dumps(message), qos=0, retain=True)
+
         except Exception: pass
     sleep(2.0)
 
@@ -193,7 +208,7 @@ def run():
     logging.info("Subscribe")
     subscribe(client)
     stop_event = threading.Event()
-    secondary_thread = threading.Thread(target=start_secondary, args=(stop_event,))
+    secondary_thread = threading.Thread(target=start_secondary, args=(stop_event,client,))
     secondary_thread.daemon = True
     secondary_thread.start()    
     logging.info("Loop")
