@@ -85,6 +85,7 @@ def start_secondary(stop_event, client):
   last_temp = dht_device.temperature
   last_humid = dht_device.humidity
   topic = settings['device']['metrics'][1]['state_topic']
+  message = {}
   message['temperature'] = str(last_temp)
   message['humidity'] = str(last_humid)
   client.publish(topic, json.dumps(message), qos=0, retain=True)
@@ -93,7 +94,7 @@ def start_secondary(stop_event, client):
     logging.info("thread loop")
     if dht_enabled:
         try:
-            message = {}
+            message.clear()
             temperature_c = dht_device.temperature
             humidity = dht_device.humidity
             logging.info("temp="+str(temperature_c)+"hum="+str(humidity))
