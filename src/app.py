@@ -125,7 +125,7 @@ def on_connect(client, userdata, flags, rc, properties):
     
     if rc == 0:
         logging.info("Connected to MQTT Broker!")
-        result = client.publish(settings['topics']['availability'], "online", qos=2, retain=True)
+        result = client.publish(settings['device']['availability'], "online", qos=2, retain=True)
         publish_descriptors(client)
         publish_state(client)
     else:
