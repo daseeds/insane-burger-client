@@ -1,0 +1,24 @@
+{
+    "availability": [
+      {
+        "topic": "zigbee2mqtt/bridge/state"
+      }
+    ],
+    "device": {
+      "identifiers": [
+        "zigbee2mqtt_0x00124b00231e5790"
+      ],
+      "manufacturer": "SONOFF",
+      "model": "Temperature and humidity sensor",
+      "name": "SNZB-02-06",
+      "sw_version": "Zigbee2MQTT 1.18.1"
+    },
+    "device_class": "temperature",
+    "json_attributes_topic": "zigbee2mqtt/SNZB-02-06",
+    "name": "Toulon1temperature",
+    "state_topic": "zigbee2mqtt/SNZB-02-06",
+    "unique_id": "0x00124b00231e5790_temperature_zigbee2mqtt",
+    "unit_of_measurement": "°C",
+    "value_template": "{{ value_json.temperature }}"
+  }
+    

@@ -14,22 +14,7 @@ import io
 with open('settings.yml', 'r') as file:
     settings = yaml.safe_load(file)
 
-with open(settings['descriptor'], 'r') as file:
-    descriptor = json.load(file)
-
-descriptor['unique_id'] = settings['unique_id']
-descriptor['name'] = settings['unique_id']
-descriptor['device']['name'] = settings['unique_id']
-descriptor['state_topic'] = settings['topics']['state']
-descriptor['command_topic'] = settings['topics']['command']
-descriptor['device']['identifiers'].clear()
-descriptor['device']['identifiers'].append(settings['unique_id'])
-descriptor['availability'].clear()
-avail = {}
-avail['topic'] = settings['topics']['availability']
-
-descriptor['availability'].append(avail)
-
+  
 
 gpio_enabled = False
 
@@ -56,6 +41,38 @@ if is_raspberrypi:
         dht_device = adafruit_dht.DHT22(board.D17)
     except RuntimeError:
         print("Error importing adafruit_dht! ")
+
+
+def publish_descriptors(client):
+    for metric in settings['device']['metrics']:
+        message = {}
+        avail = {}
+        avail['topic'] = settings['device']['availability']
+        message['availability'].append(avail)
+        message['device']['identifiers'] = []
+        message['device']['identifiers'].append(settings['device']['identifier'])
+        message['device']['manufacturer'] = settings['device']['manufacturer']
+        message['device']['model'] = settings['device']['model']
+        message['device']['name'] = settings['device']['name']
+        message['device']['sw_version'] = settings['device']['sw_version']
+        message['device_class'] = metric['device_class']
+        message['json_attributes_topic'] = metric['json_attributes_topic']
+        message['name'] = metric['name']
+        message['state_topic'] = metric['state_topic']
+        message['unique_id'] = metric['unique_id']
+        if "command_topic" in metric:
+            message['command_topic'] = metric['command_topic']
+        if "payload_off" in metric:
+            message['payload_off'] = metric['payload_off']
+        if "payload_on" in metric:
+            message['payload_on'] = metric['payload_on']
+        if "unit_of_measurement" in metric:
+            message['unit_of_measurement'] = metric['unit_of_measurement']
+        if "retain" in metric:
+            message['retain'] = metric['retain']
+        advertise_topic = "homeassistant/"+metric['advertise']+"/"+settings['device']['identifier']+"/"+metric['device_class']+"/config"
+        result = client.publish(advertise_topic, json.dumps(message), qos=2, retain=True)
+
 
 def start_secondary(stop_event):
   global dht_enabled
@@ -88,8 +105,9 @@ def switch_off(client):
 
 def publish_state(client):
     global switch1_state
-    logging.info("Publish " + switch1_state + " on " + settings['topics']['state'])
-    client.publish(settings['topics']['state'], switch1_state, qos=2, retain=True)
+    topic = settings['device']['metrics'][0]['state_topic']
+    logging.info("Publish " + switch1_state + " on " + topic)
+    client.publish(topic, switch1_state, qos=2, retain=True)
 
 def on_log(client, userdata, paho_log_level, messages):
     if paho_log_level == mqtt_client.LogLevel.MQTT_LOG_ERR:
@@ -108,7 +126,7 @@ def on_connect(client, userdata, flags, rc, properties):
     if rc == 0:
         logging.info("Connected to MQTT Broker!")
         result = client.publish(settings['topics']['availability'], "online", qos=2, retain=True)
-        result = client.publish(settings['topics']['advertise'], json.dumps(descriptor), qos=2, retain=True)
+        publish_descriptors(client)
         publish_state(client)
     else:
         logging.info("Failed to connect, return code %d\n", rc)
@@ -119,7 +137,7 @@ def on_message(client, userdata, message, properties=None):
         + "' with QoS " + str(message.qos))
     
     topic = message.topic.split("/")
-    if message.topic == settings['topics']['command']:
+    if message.topic == settings['device']['metrics'][0]['command_topic']:
         if message.payload == b'on':
             logging.info("Command switch1 HIGH yo")
             switch_on(client)
@@ -132,14 +150,15 @@ def on_message(client, userdata, message, properties=None):
             subprocess.run(["bash", "-c", "echo update.sh > /shared/host_executor_queue"])
             
 
-
 def on_disconnect(client, userdata, disconnect_flags, reason_code, properties):
-    result = client.publish(settings['topics']['availability'], "offline", qos=2, retain=True)
+    result = client.publish(settings['device']['availability'], "offline", qos=2, retain=True)
 
 def subscribe(client: mqtt_client):
-    for topic in settings['to_sub']:
-        logging.info("Subscribe to " + topic)
-        client.subscribe(topic)
+    for metric in settings['device']['metrics']:
+        if "command_topic" in metric:
+            topic = metric['command_topic']
+            logging.info("Subscribe to " + topic)
+            client.subscribe(topic)
 
 def run():
     logging.basicConfig(format='%(asctime)s %(message)s')
