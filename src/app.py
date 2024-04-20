@@ -74,6 +74,7 @@ def publish_descriptors(client):
         if "retain" in metric:
             message['retain'] = metric['retain']
         advertise_topic = "homeassistant/"+metric['advertise']+"/"+settings['device']['identifier']+"/"+metric['device_class']+"/config"
+        logging.info("On " + advertise_topic)
         result = client.publish(advertise_topic, json.dumps(message), qos=2, retain=True)
 
 
