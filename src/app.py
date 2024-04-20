@@ -180,7 +180,7 @@ def run():
     client.on_message = on_message
     client.on_subscribe = on_subscribe
     client.user_data_set([])
-    client.will_set(settings['topics']['availability'],"offline",qos=2, retain=True)
+    client.will_set(settings['device']['availability'],"offline",qos=2, retain=True)
     client.on_log = on_log
     logging.info("Connect to %s:%s", settings['mqtt']['broker'], settings['mqtt']['port'])
     result = client.connect(settings['mqtt']['broker'], settings['mqtt']['port'])
