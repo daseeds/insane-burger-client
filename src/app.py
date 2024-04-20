@@ -101,8 +101,10 @@ def start_secondary(stop_event, client):
 
             if temperature_c != last_temp:
                 message['temperature'] = str(temperature_c)
+                last_temp = temperature_c
             if humidity != last_humid:
                 message['humidity'] = str(humidity)
+                last_humid = humidity
 
             if len(message.keys()) > 0:
                 logging.info("Publish on " + topic)
