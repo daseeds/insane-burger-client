@@ -58,7 +58,7 @@ def publish_descriptors(client):
         message['device']['name'] = settings['device']['name']
         message['device']['sw_version'] = settings['device']['sw_version']
         message['device_class'] = metric['device_class']
-        message['json_attributes_topic'] = metric['json_attributes_topic']
+        message['json_attribute_topic'] = metric['json_attribute_topic']
         message['name'] = metric['name']
         message['state_topic'] = metric['state_topic']
         message['unique_id'] = metric['unique_id']
