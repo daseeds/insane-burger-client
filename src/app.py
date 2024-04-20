@@ -50,6 +50,7 @@ def publish_descriptors(client):
         avail['topic'] = settings['device']['availability']
         message['availability'] = []
         message['availability'].append(avail)
+        message['device'] = {}
         message['device']['identifiers'] = []
         message['device']['identifiers'].append(settings['device']['identifier'])
         message['device']['manufacturer'] = settings['device']['manufacturer']
