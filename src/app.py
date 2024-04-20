@@ -111,7 +111,7 @@ def start_secondary(stop_event, client):
                 client.publish(topic, json.dumps(message), qos=0, retain=True)
 
         except Exception: pass
-    sleep(2.0)
+    sleep(60.0)
 
 def switch_on(client):
     global switch1_state
