@@ -55,10 +55,10 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 auth = {}
 auth["username"] = settings['mqtt']['username']
-auth["password"], settings['mqtt']['password']
+auth["password"] = settings['mqtt']['password']
 tls = {}
-tls["ca_certs"], None
-tls["insecure"], True
+tls["ca_certs"] = None
+tls["insecure"] = True
 
 myHandler = MQTTHandler(hostname=settings['mqtt']['broker'],
                         topic=settings['mqtt']['logs'], 
