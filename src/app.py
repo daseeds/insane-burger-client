@@ -4,6 +4,7 @@ import subprocess
 import yaml
 import time
 from paho.mqtt import client as mqtt_client
+import paho.mqtt.publish as publish
 import logging
 import sys
 import json
@@ -11,14 +12,73 @@ import threading
 from time import sleep
 import io
 
+
+class MQTTHandler(logging.Handler):
+    """
+    A handler class which writes logging records, appropriately formatted,
+    to a MQTT server to a topic.
+    """
+    def __init__(self, hostname, topic, qos=0, retain=False,
+            port=1883, client_id='', keepalive=60, will=None, auth=None,
+            tls=None, protocol=mqtt_client.MQTTv31, transport='tcp'):
+        logging.Handler.__init__(self)
+        self.topic = topic
+        self.qos = qos
+        self.retain = retain
+        self.hostname = hostname
+        self.port = port
+        self.client_id = client_id
+        self.keepalive = keepalive
+        self.will = will
+        self.auth = auth
+        self.tls = tls
+        self.protocol = protocol
+        self.transport = transport
+
+    def emit(self, record):
+        """
+        Publish a single formatted logging record to a broker, then disconnect
+        cleanly.
+        """
+        msg = self.format(record)
+        publish.single(self.topic, msg, self.qos, self.retain,
+            hostname=self.hostname, port=self.port,
+            client_id=self.client_id, keepalive=self.keepalive,
+            will=self.will, auth=self.auth, tls=self.tls,
+            protocol=self.protocol, transport=self.transport)
+
 with open('settings.yml', 'r') as file:
     settings = yaml.safe_load(file)
+
+logging.basicConfig(format='%(asctime)s %(message)s')
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+auth = {}
+auth.add("username", settings['mqtt']['username'])
+auth.add("password", settings['mqtt']['password'])
+tls = {}
+tls.add("ca_certs", None)
+tls.add("insecure", True)
+
+myHandler = MQTTHandler(hostname=settings['mqtt']['broker'],
+                        topic=settings['mqtt']['logs'], 
+                        port=settings['mqtt']['port'],
+                        auth=auth, tls=tls)
+myHandler.setLevel(logging.INFO)
+myHandler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s: %(message)s'))
+logger.addHandler(myHandler)
+
+logger.info("Start Application")
+
+
+
 
   
 
 gpio_enabled = False
 
 switch1_state = "off"
+
 
 def is_raspberrypi():
     try:
@@ -91,13 +151,13 @@ def start_secondary(stop_event, client):
   client.publish(topic, json.dumps(message), qos=0, retain=True)
 
   while not stop_event.is_set():
-    logging.info("thread loop")
+    logging.debug("thread loop")
     if dht_enabled:
         try:
             message.clear()
             temperature_c = dht_device.temperature
             humidity = dht_device.humidity
-            logging.info("temp="+str(temperature_c)+"hum="+str(humidity))
+            logging.debug("temp="+str(temperature_c)+"hum="+str(humidity))
 
             if temperature_c != last_temp:
                 message['temperature'] = str(temperature_c)
@@ -107,7 +167,7 @@ def start_secondary(stop_event, client):
                 last_humid = humidity
 
             if len(message.keys()) > 0:
-                logging.info("Publish on " + topic)
+                logging.debug("Publish on " + topic)
                 client.publish(topic, json.dumps(message), qos=0, retain=True)
 
         except Exception: pass
@@ -187,9 +247,6 @@ def subscribe(client: mqtt_client):
             client.subscribe(topic)
 
 def run():
-    logging.basicConfig(format='%(asctime)s %(message)s')
-    logging.getLogger().setLevel(logging.INFO)
-    logging.info("Start Application")
 
     if gpio_enabled:
         GPIO.setmode(GPIO.BCM)
