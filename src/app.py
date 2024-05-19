@@ -192,7 +192,7 @@ def switch_off(client):
 def publish_state(client):
     global switch1_state
     topic = settings['device']['metrics'][0]['state_topic']
-    logging.info("Publish " + switch1_state + " on " + topic)
+    logging.debug("Publish " + switch1_state + " on " + topic)
     client.publish(topic, switch1_state, qos=2, retain=True)
 
 def on_log(client, userdata, paho_log_level, messages):
@@ -225,14 +225,14 @@ def on_message(client, userdata, message, properties=None):
     topic = message.topic.split("/")
     if message.topic == settings['device']['metrics'][0]['command_topic']:
         if message.payload == b'on':
-            logging.info("Command switch1 HIGH yo")
+            logging.debug("Command switch1 HIGH yo")
             switch_on(client)
         if message.payload == b'off':
-            logging.info("Command switch1 LOW")
+            logging.debug("Command switch1 LOW")
             switch_off(client)
     if topic[-1] == "command":
         if message.payload == b"update":
-            logging.info("Update")
+            logging.debug("Update")
             subprocess.run(["bash", "-c", "echo update.sh > /shared/host_executor_queue"])
             
 
