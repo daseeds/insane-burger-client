@@ -63,7 +63,7 @@ tls["insecure"] = True
 myHandler = MQTTHandler(hostname=settings['mqtt']['broker'],
                         topic=settings['mqtt']['logs'], 
                         port=settings['mqtt']['port'],
-                        auth=auth, tls=tls)
+                        auth=auth, tls=tls, retain=True)
 myHandler.setLevel(logging.INFO)
 myHandler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s: %(message)s'))
 logger.addHandler(myHandler)
